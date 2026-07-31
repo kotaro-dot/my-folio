@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 30% 15%, oklch(50% 0.19 275), oklch(36% 0.19 275) 70%);font-family:'Inter',-apple-system,'Hiragino Sans','Yu Gothic',sans-serif;overflow:hidden}
+#splash{display:flex;flex-direction:column;align-items:center;justify-content:center}
+#book{position:relative;width:150px;height:182px;margin-bottom:34px;opacity:0;transform:scale(0.7) translateY(24px);transition:opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1)}
+#book.shown{opacity:1;transform:scale(1) translateY(0)}
+#book-spine{position:absolute;right:-9px;top:5px;bottom:5px;width:16px;border-radius:0 5px 5px 0;background:repeating-linear-gradient(to bottom, oklch(97% 0.01 90) 0px, oklch(97% 0.01 90) 4px, oklch(90% 0.01 90) 4px, oklch(90% 0.01 90) 5px);box-shadow:0 10px 22px rgba(0,0,0,0.25)}
+#book-cover{position:absolute;left:0;top:0;width:135px;height:182px;border-radius:8px 2px 2px 8px;background:oklch(70% 0.18 68);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 22px rgba(0,0,0,0.25)}
+#book-cover span{font-size:74px;font-weight:800;color:white;line-height:1}
+#ribbon{position:absolute;top:0;left:30px;width:21px;height:60px;background:white;clip-path:polygon(0 0, 100% 0, 100% 82%, 50% 100%, 0 82%);transform-origin:top center;transform:rotate(-14deg);transition:transform 0.9s cubic-bezier(.34,1.56,.64,1) 0.35s}
+#ribbon.swung{transform:rotate(0deg)}
+#label{display:flex;align-items:center;gap:6px;margin-bottom:10px;opacity:0;transform:translateY(10px);transition:opacity 0.5s ease 0.45s, transform 0.5s ease 0.45s}
+#label.shown{opacity:1;transform:translateY(0)}
+#dot1{width:6px;height:6px;border-radius:2px;background:white;display:inline-block}
+#dot2{width:6px;height:6px;border-radius:999px;background:oklch(75% 0.17 75);display:inline-block}
+#eyebrow{font-size:12px;font-weight:700;letter-spacing:0.16em;color:rgba(255,255,255,0.75);text-transform:uppercase}
+#title{font-size:32px;font-weight:800;color:white;letter-spacing:-0.01em;opacity:0;transform:translateY(10px);transition:opacity 0.5s ease 0.55s, transform 0.5s ease 0.55s}
+#title.shown{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div id="splash">
+  <div id="book">
+    <div id="book-spine"></div>
+    <div id="book-cover"><span>A</span></div>
+    <div id="ribbon"></div>
+  </div>
+  <div id="label">
+    <span id="dot1"></span>
+    <span id="dot2"></span>
+    <span id="eyebrow">Daily English</span>
+  </div>
+  <div id="title">My Folio</div>
+</div>
+<script>
+requestAnimationFrame(function(){
+  document.getElementById('book').classList.add('shown');
+  document.getElementById('label').classList.add('shown');
+  document.getElementById('title').classList.add('shown');
+  setTimeout(function(){
+    document.getElementById('ribbon').classList.add('swung');
+  }, 350);
+  setTimeout(function(){
+    window.location.href = 'index.html';
+  }, 2000);
+});
+</script>
+</body>
+</html>
