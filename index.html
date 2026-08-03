@@ -352,7 +352,7 @@ var h='<div class="detail-tag">'+cat.label+'</div>';
 h+='<div class="mode-toggle"><button class="mode-btn'+(viewMode==='both'?' active':'')+'" onclick="setMode(\x27both\x27,\x27'+id+'\x27)">英文+日本語</button><button class="mode-btn'+(viewMode==='ja'?' active':'')+'" onclick="setMode(\x27ja\x27,\x27'+id+'\x27)">日本語のみ</button></div>';
 var _chunkData=CHUNKS[m.id];var _chunks=[];if(_chunkData){var _parts=_chunkData.split('|');_parts.forEach(function(p,i){_chunks.push('<span id="c'+i+'">'+p+'</span>')});}else{_chunks.push('<span id="c0">'+m.englishText+'</span>');}var _numChunks=_chunks.length;if(viewMode!=='ja'){h+='<p class="en-text" id="en-words">'+_chunks.join(' ')+'</p>';}
 if(viewMode==='ja'){var _jtext=m.japaneseText,_jsplits=_jtext.split(/(?<=[、。！？，])/g).filter(function(x){return x.length>0}),_jchunks=[],_jbuf='';_jsplits.forEach(function(p,pi){_jbuf+=p;if(_jbuf.length>=8||pi===_jsplits.length-1){_jchunks.push('<span id="j'+(_jchunks.length)+'">'+_jbuf+'</span>');_jbuf=''}});h+='<p class="ja-text" id="ja-words" style="font-size:19px;line-height:1.85;color:var(--text)">'+_jchunks.join('')+'</p>';}else{h+='<p class="ja-text">'+m.japaneseText+'</p>';}
-if(m.audioFile){h+='<div class="audio-card"><div class="audio-row"><button class="play-btn" id="pbtn" onclick="togglePlay(\''+m.audioFile+'\')">▶</button><div class="play-label" style="flex:1;text-align:center;color:var(--textSoft);font-size:13px">再生中</div></div><div><input type="range" class="seek-bar" id="seekbar" min="0" max="1000" value="0" oninput="seekTo(this.value)"></div><div class="time-speed"><span class="time-label" id="tl">0:00 / 0:00</span><div class="speed-row">';[0.8,1.0,1.2,1.5,2.0].forEach(function(s){h+='<button class="speed-chip'+(curSpeed===s?' active':'')+'" onclick="setSpeed('+s+')">'+s.toFixed(1)+'</button>'});h+='</div></div><div class="mode-ctrl-row"><button class="mode-ctrl-btn'+(repeatMode?' active':'')+'" onclick="toggleRepeat()">&#128257; リピート</button><button class="mode-ctrl-btn'+(autoMode?' active':'')+'" onclick="toggleAuto()">&#9654;&#9654; 自動再生</button></div></div>'}else{h+='<div class="audio-card"><p class="no-audio">音声が未設定です</p></div>'}
+if(m.audioFile){h+='<div class="audio-card"><div class="audio-row"><button class="play-btn" style="width:38px;height:38px;font-size:13px;margin-right:6px" onclick="navRestart()">⏮</button><button class="play-btn" id="pbtn" onclick="togglePlay(\''+m.audioFile+'\')">▶</button><button class="play-btn" style="width:38px;height:38px;font-size:13px;margin-left:6px" onclick="navNext()">⏭</button><div class="play-label" style="flex:1;text-align:center;color:var(--textSoft);font-size:13px">再生中</div></div><div><input type="range" class="seek-bar" id="seekbar" min="0" max="1000" value="0" oninput="seekTo(this.value)"></div><div class="time-speed"><span class="time-label" id="tl">0:00 / 0:00</span><div class="speed-row">';[0.8,1.0,1.2,1.5,2.0].forEach(function(s){h+='<button class="speed-chip'+(curSpeed===s?' active':'')+'" onclick="setSpeed('+s+')">'+s.toFixed(1)+'</button>'});h+='</div></div><div class="mode-ctrl-row"><button class="mode-ctrl-btn'+(repeatMode?' active':'')+'" onclick="toggleRepeat()">&#128257; リピート</button><button class="mode-ctrl-btn'+(autoMode?' active':'')+'" onclick="toggleAuto()">&#9654;&#9654; 自動再生</button></div></div>'}else{h+='<div class="audio-card"><p class="no-audio">音声が未設定です</p></div>'}
 h+='<div class="vocab-section"><div class="vocab-title">VOCABULARY</div><div id="vocab-list"></div><div class="vocab-add-row"><input class="vocab-input" id="vi-w" placeholder="英単語"><input class="vocab-input" id="vi-m" placeholder="意味"><button class="vocab-add-btn" onclick="addVocabClick()">+</button></div></div>';h+='<div class="diff-row">';h+='<button class="diff-btn'+(getDiff(m.id)==='hard'?' active-hard':'')+'" data-id="'+m.id+'" data-lv="hard" onclick="setDiff(this.dataset.id,this.dataset.lv)">&#9889; 難しい</button>';h+='<button class="diff-btn'+(getDiff(m.id)==='easy'?' active-easy':'')+'" data-id="'+m.id+'" data-lv="easy" onclick="setDiff(this.dataset.id,this.dataset.lv)">&#9989; いける</button>';h+='</div>';h+='<button class="learned-btn '+(m.isLearned?'on':'off')+'" onclick="toggleLearned(\''+id+'\')">'+(m.isLearned?'学習済み ✓':'学習済みにする')+'</button>';
 h+='<div class="detail-spacer"></div>';scr(h);renderVocab();showTabs(false)}
 
@@ -363,13 +363,36 @@ showTabs(false)}
 // Audio
 function toggleRepeat(){repeatMode=!repeatMode;if(repeatMode)autoMode=false;var btns=document.querySelectorAll('.mode-ctrl-btn');if(btns[0])btns[0].className='mode-ctrl-btn'+(repeatMode?' active':'');if(btns[1])btns[1].className='mode-ctrl-btn'+(autoMode?' active':'')}
 function toggleAuto(){autoMode=!autoMode;if(autoMode)repeatMode=false;var btns=document.querySelectorAll('.mode-ctrl-btn');if(btns[0])btns[0].className='mode-ctrl-btn'+(repeatMode?' active':'');if(btns[1])btns[1].className='mode-ctrl-btn'+(autoMode?' active':'')}
+
+function getAdjacentMaterial(dir){
+  var d=ld();
+  var cur=d.find(function(x){return x.id===curId});
+  if(!cur)return null;
+  var cat=d.filter(function(x){return x.categoryId===cur.categoryId});
+  var idx=cat.findIndex(function(x){return x.id===cur.id});
+  var next=cat[idx+dir];
+  return next||null;
+}
+function navRestart(){
+  if(ap.currentTime<0.3){
+    var prev=getAdjacentMaterial(-1);
+    if(prev){stopAudio();showDetail(prev.id);setTimeout(function(){if(prev.audioFile)togglePlay(prev.audioFile)},300);}
+    else{ap.currentTime=0;seekTo(0);}
+  }else{
+    ap.currentTime=0;seekTo(0);
+  }
+}
+function navNext(){
+  var next=getAdjacentMaterial(1);
+  if(next){stopAudio();showDetail(next.id);setTimeout(function(){if(next.audioFile)togglePlay(next.audioFile)},300);}
+}
 function seekTo(val){if(ap.duration){ap.currentTime=ap.duration*val/1000}}
 function togglePlay(f){if(audioFile!==f){ap.src='audio/'+f;ap.playbackRate=curSpeed;audioFile=f}if(ap.paused){ap.play();document.getElementById('pbtn').textContent='❚❚'}else{ap.pause();document.getElementById('pbtn').textContent='▶'}}
 function setSpeed(s){curSpeed=s;ap.playbackRate=s;document.querySelectorAll('.speed-chip').forEach(function(c){c.classList.toggle('active',parseFloat(c.textContent)===s)})}
 function stopAudio(){ap.pause();ap.currentTime=0;audioFile='';document.querySelectorAll('.word-hl').forEach(function(s){s.classList.remove('word-hl')});document.querySelectorAll('.ja-hl').forEach(function(s){s.classList.remove('ja-hl')});document.querySelectorAll('.ja-hl').forEach(function(s){s.classList.remove('ja-hl')})}
 function seekWave(e){if(!ap.duration)return;var r=e.currentTarget.getBoundingClientRect();var p=(e.clientX-r.left)/r.width;ap.currentTime=p*ap.duration}
 function fmtTime(s){if(!isFinite(s))s=0;var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0')}
-ap.addEventListener('timeupdate',function(){if(curScreen!=='detail')return;var tl=document.getElementById('tl');if(tl)tl.textContent=fmtTime(ap.currentTime)+' / '+fmtTime(ap.duration);var bars=document.querySelectorAll('.wave-bar');if(bars.length&&ap.duration){var pct=Math.min(1,(ap.currentTime+0.3)/ap.duration);bars.forEach(function(b,i){b.classList.toggle('active',i/bars.length<pct)})}var ep=document.getElementById('en-words');if(ep&&ap.duration){var echunks=ep.querySelectorAll('span[id^="c"]');if(echunks.length){var ewcs=[],etw=0;echunks.forEach(function(s){var wc=s.textContent.replace(/\s/g,'').length;ewcs.push(wc);etw+=wc});var epct=Math.min(1,(ap.currentTime+0.3)/ap.duration),ecum=0,eci=0;for(var i=0;i<ewcs.length;i++){ecum+=ewcs[i]/etw;if(epct<ecum){eci=i;break}if(i===ewcs.length-1)eci=i}echunks.forEach(function(s,i){s.classList.toggle('word-hl',i===eci)})}}if(viewMode==='ja'){var jp=document.getElementById('ja-words');if(jp&&ap.duration){var jchunks=jp.querySelectorAll('span[id^="j"]');if(jchunks.length){var jwcs=[],jtw=0;jchunks.forEach(function(s){jwcs.push(s.textContent.length);jtw+=s.textContent.length});var jpct=Math.min(1,(ap.currentTime+0.3)/ap.duration),jcum=0,jci=0;for(var ji=0;ji<jwcs.length;ji++){jcum+=jwcs[ji]/jtw;if(jpct<jcum){jci=ji;break}if(ji===jwcs.length-1)jci=ji}jchunks.forEach(function(s,i){if(i===jci){s.classList.add('ja-hl')}else{s.classList.remove('ja-hl')}})}}}});
+ap.addEventListener('timeupdate',function(){if(curScreen!=='detail')return;var tl=document.getElementById('tl');if(tl)tl.textContent=fmtTime(ap.currentTime)+' / '+fmtTime(ap.duration);var sb=document.getElementById('seekbar');if(sb&&ap.duration){sb.value=Math.floor(ap.currentTime/ap.duration*1000)}var ep=document.getElementById('en-words');if(ep&&ap.duration){var echunks=ep.querySelectorAll('span[id^="c"]');if(echunks.length){var ewcs=[],etw=0;echunks.forEach(function(s){var wc=s.textContent.replace(/\s/g,'').length;ewcs.push(wc);etw+=wc});var epct=Math.min(1,(ap.currentTime+0.3)/ap.duration),ecum=0,eci=0;for(var i=0;i<ewcs.length;i++){ecum+=ewcs[i]/etw;if(epct<ecum){eci=i;break}if(i===ewcs.length-1)eci=i}echunks.forEach(function(s,i){s.classList.toggle('word-hl',i===eci)})}}if(viewMode==='ja'){var jp=document.getElementById('ja-words');if(jp&&ap.duration){var jchunks=jp.querySelectorAll('span[id^="j"]');if(jchunks.length){var jwcs=[],jtw=0;jchunks.forEach(function(s){jwcs.push(s.textContent.length);jtw+=s.textContent.length});var jpct=Math.min(1,(ap.currentTime+0.3)/ap.duration),jcum=0,jci=0;for(var ji=0;ji<jwcs.length;ji++){jcum+=jwcs[ji]/jtw;if(jpct<jcum){jci=ji;break}if(ji===jwcs.length-1)jci=ji}jchunks.forEach(function(s,i){if(i===jci){s.classList.add('ja-hl')}else{s.classList.remove('ja-hl')}})}}}});
 ap.addEventListener('ended',function(){var b=document.getElementById('pbtn');if(b)b.textContent='▶';if(repeatMode&&audioFile){ap.currentTime=0;ap.play();if(b)b.textContent='❚❚';}else if(autoMode){var d=ld();var cur=d.find(function(x){return x.audioFile&&audioFile.endsWith(x.audioFile)});if(cur){var cat=d.filter(function(x){return x.categoryId===cur.categoryId});var idx=cat.findIndex(function(x){return x.id===cur.id});if(idx>=0&&idx<cat.length-1){var next=cat[idx+1];if(next.audioFile){showDetail(next.id);setTimeout(function(){togglePlay(next.audioFile)},500);}}}}});
 // Actions
 
@@ -386,6 +409,9 @@ logAct();showHome();
 </script>
 </body>
 </html>
+
+
+
 
 
 
