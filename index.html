@@ -405,10 +405,11 @@ function setDiff(id,lv){var d=JSON.parse(localStorage.getItem('mf_diff')||'{}');
 function setMode(mode,id){viewMode=mode;showDetail(id)}
 function toggleLearned(id){var d=ld(),m=d.find(function(x){return x.id===id});if(m){m.isLearned=!m.isLearned;sv(d);logAct();showDetail(id)}}
 function saveNew(){var t=document.getElementById('af-t').value.trim(),e=document.getElementById('af-e').value.trim(),j=document.getElementById('af-j').value.trim(),a=document.getElementById('af-a').value.trim();if(!t||!e||!j){alert('タイトル・英文・日本語訳をすべて入力してください。');return}var d=ld();d.push({id:curCat+'_'+Date.now(),categoryId:curCat,title:t,englishText:e,japaneseText:j,audioFile:a||null,isLearned:false});sv(d);showList(curCat)}
-logAct();showHome();
+logAct();showHome();var _swX=0,_swY=0;document.addEventListener('touchstart',function(e){_swX=e.touches[0].clientX;_swY=e.touches[0].clientY},{passive:true});document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-_swX;var dy=Math.abs(e.changedTouches[0].clientY-_swY);if(dy<60&&((dx>60&&_swX<30)||(dx<-60&&_swX>window.innerWidth-30))){if(curScreen==='detail'&&curCat)showList(curCat);else if(curScreen==='list')showHome();}},{passive:true});
 </script>
 </body>
 </html>
+
 
 
 
