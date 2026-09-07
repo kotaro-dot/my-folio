@@ -326,14 +326,14 @@ if(isDark)document.documentElement.classList.add('dark');
 function toggleTheme(){isDark=!isDark;document.documentElement.classList.toggle('dark',isDark);localStorage.setItem(TK,isDark?'dark':'light')}
 // Screens
 function showHome(){curScreen='home';stopAudio();logAct();var st=calcStreak(),all=ld(),totalL=all.filter(function(m){return m.isLearned}).length;
-hdr('<div class="header-left"><div class="logo-row"><div class="logo-dot1"></div><div class="logo-dot2"></div><span class="eyebrow" style="margin-left:4px">DAILY ENGLISH</span></div><h1>My Folio</h1></div><div class="toggle" onclick="toggleTheme();showHome()"><div class="toggle-knob"></div></div>');
+hdr('<div class="header-left"><div class="logo-row"><div class="logo-dot1"></div><div class="logo-dot2"></div><span class="eyebrow" style="margin-left:4px">DAILY ENGLISH</span></div><h1>My Folio</h1></div>');
 var h='<div class="hero"><div class="hero-left"><div class="hero-circle"></div><div class="hero-num">'+st.cur+'</div><div class="hero-label">日連続</div></div><div class="hero-right"><div class="hero-stat"><span class="hero-stat-label">学習済み</span><span class="hero-stat-val">'+totalL+' / '+all.length+'</span></div><div class="hero-stat"><span class="hero-stat-label">最長ストリーク</span><span class="hero-stat-val accent-col">'+st.max+'</span></div></div></div>';
 h+='<div class="cat-list">';
 CATS.forEach(function(cat,ci){var s=catStats(cat.id);h+='<div class="cat-card" style="border-left-color:'+catColor(ci)+'" onclick="showList(\''+cat.id+'\')"><div class="cat-card-inner"><img class="cat-img" src="'+cat.img+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover"><div class="cat-info"><div class="cat-name">'+cat.label+'</div><div class="cat-status">'+(s.total>0?s.learned+' / '+s.total+' 完了':'教材なし')+'</div></div><div style="'+ring(42,s.pct,catColor(ci))+'"><div class="cat-ring-inner" style="background:var(--surface);color:'+catColor(ci)+'">'+s.pct+'%</div></div></div><div class="cat-bar" style="background:'+catColor(ci)+'"></div></div>'});
 h+='</div>';scr(h);showTabs(true);setTabs(0)}
 
 function showRecords(){curScreen='records';stopAudio();var st=calcStreak(),all=ld(),totalL=all.filter(function(m){return m.isLearned}).length;
-hdr('<div class="header-left"><span class="eyebrow">PROGRESS</span><h1>学習記録</h1></div><div class="toggle" onclick="toggleTheme();showRecords()"><div class="toggle-knob"></div></div>');
+hdr('<div class="header-left"><span class="eyebrow">PROGRESS</span><h1>学習記録</h1></div>');
 var h='<div class="rec-grid"><div class="rec-card primary"><div class="rec-num">'+st.cur+'</div><div class="rec-label">日連続学習中</div></div><div class="rec-card secondary"><div class="rec-num">'+st.max+'</div><div class="rec-label">最長ストリーク</div></div></div>';
 h+='<div class="rec-total"><div class="rec-num">'+totalL+' / '+all.length+'</div><div class="rec-label">総学習済み</div></div>';
 h+='<div class="rec-section">カテゴリ別の進捗</div>';
@@ -341,13 +341,13 @@ CATS.forEach(function(cat,ci){var s=catStats(cat.id);h+='<div class="rec-cat"><d
 scr(h);showTabs(true);setTabs(1)}
 
 function showList(cid){curScreen='list';curCat=cid;stopAudio();var ci=CATS.findIndex(function(c){return c.id===cid}),cat=CATS[ci],s=catStats(cid),items=ld().filter(function(m){return m.categoryId===cid});
-hdr('<div class="back-row"><button class="back-btn" onclick="showHome()">← 戻る</button><span class="header-title">'+cat.label+'</span></div><div class="toggle" onclick="toggleTheme();showList(\''+cid+'\')"><div class="toggle-knob"></div></div>');
+hdr('<div class="back-row"><button class="back-btn" onclick="showHome()">← 戻る</button><span class="header-title">'+cat.label+'</span></div>');
 var h='<div class="progress-banner" style="background-color:'+catColor(ci)+'"><div class="p-ring" style="'+ring(36,s.pct,'rgba(255,255,255,0.5)')+'"><div class="p-ring-inner">'+s.pct+'</div></div><div><div class="p-label">進捗</div><div class="p-status">'+s.learned+' / '+s.total+' 完了</div></div></div>';
 if(items.length===0){h+='<p class="empty">教材がまだありません</p>'}else{items.forEach(function(m,idx){var _isChallenge=m.title.indexOf('C')===0;var _isHard=PP_HARD.indexOf(m.id)>=0;var _showDagger=_isChallenge||_isHard;h+='<div class="mat-item" style="border-left:3px solid '+catColor(ci)+';background:color-mix(in srgb, '+catColor(ci)+' 6%, var(--surface))" onclick="showDetail(\''+m.id+'\')"><div class="mat-badge" style="background:'+catColor(ci)+'">'+(idx<9?'0':'')+(idx+1)+'</div><div class="mat-title">'+(_showDagger?DAGGER_SVG:'')+m.title+(getDiff(m.id)==='hard'?' &#9889;':'')+(getDiff(m.id)==='easy'?' &#9989;':'')+'</div>'+(m.isLearned?'<span class="mat-learned" style="background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent)">学習済み</span>':'')+'<span class="mat-chevron">›</span></div>'})}
 scr(h);showTabs(true);setTabs(0)}
 
 function showDetail(id){var _same=curId===id;curScreen='detail';curId=id;if(!_same)stopAudio();var m=ld().find(function(x){return x.id===id});if(!m){showHome();return}var ci=CATS.findIndex(function(c){return c.id===m.categoryId}),cat=CATS[ci];
-hdr('<div class="back-row"><button class="back-btn" onclick="showList(\''+m.categoryId+'\')">← 戻る</button><span class="header-title">'+m.title+'</span></div><div class="toggle" onclick="toggleTheme();showDetail(\''+id+'\')"><div class="toggle-knob"></div></div>');
+hdr('<div class="back-row"><button class="back-btn" onclick="showList(\''+m.categoryId+'\')">← 戻る</button><span class="header-title">'+m.title+'</span></div>');
 var h='<div class="detail-tag">'+cat.label+'</div>';
 h+='<div class="mode-toggle"><button class="mode-btn'+(viewMode==='both'?' active':'')+'" onclick="setMode(\x27both\x27,\x27'+id+'\x27)">英文+日本語</button><button class="mode-btn'+(viewMode==='ja'?' active':'')+'" onclick="setMode(\x27ja\x27,\x27'+id+'\x27)">日本語のみ</button></div>';
 var _chunkData=CHUNKS[m.id];var _chunks=[];if(_chunkData){var _parts=_chunkData.split('|');_parts.forEach(function(p,i){_chunks.push('<span id="c'+i+'">'+p+'</span>')});}else{_chunks.push('<span id="c0">'+m.englishText+'</span>');}var _numChunks=_chunks.length;if(viewMode!=='ja'){h+='<p class="en-text" id="en-words">'+_chunks.join(' ')+'</p>';}
@@ -356,7 +356,7 @@ if(m.audioFile){h+='<div class="audio-card"><div class="audio-row"><button class
 h+='<div class="vocab-section"><div class="vocab-title">VOCABULARY</div><div id="vocab-list"></div><div class="vocab-add-row"><input class="vocab-input" id="vi-w" placeholder="英単語"><input class="vocab-input" id="vi-m" placeholder="意味"><button class="vocab-add-btn" onclick="addVocabClick()">+</button></div></div>';h+='<div class="diff-row">';h+='<button class="diff-btn'+(getDiff(m.id)==='hard'?' active-hard':'')+'" data-id="'+m.id+'" data-lv="hard" onclick="setDiff(this.dataset.id,this.dataset.lv)">&#9889; 難しい</button>';h+='<button class="diff-btn'+(getDiff(m.id)==='easy'?' active-easy':'')+'" data-id="'+m.id+'" data-lv="easy" onclick="setDiff(this.dataset.id,this.dataset.lv)">&#9989; いける</button>';h+='</div>';h+='<div class="detail-spacer"></div>';scr(h);renderVocab();showTabs(false)}
 
 function showAdd(){curScreen='add';stopAudio();
-hdr('<div class="back-row"><button class="back-btn" onclick="showList(\''+curCat+'\')">← 戻る</button><span class="header-title">教材を追加</span></div><div class="toggle" onclick="toggleTheme();showAdd()"><div class="toggle-knob"></div></div>');
+hdr('<div class="back-row"><button class="back-btn" onclick="showList(\''+curCat+'\')">← 戻る</button><span class="header-title">教材を追加</span></div>');
 scr('<div class="form-label">タイトル</div><input class="form-input" id="af-t" placeholder="例: 013"><div class="form-label">英文</div><textarea class="form-input" id="af-e" placeholder="英文を入力"></textarea><div class="form-label">日本語訳</div><textarea class="form-input" id="af-j" placeholder="日本語訳を入力"></textarea><div class="form-label">音声ファイル名</div><input class="form-input" id="af-a" placeholder="例: 013.wav"><button class="save-btn" onclick="saveNew()">保存</button>');
 showTabs(false)}
 // Audio
