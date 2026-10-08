@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英語ライブラリ</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:#fff;color:#111;line-height:1.6;max-width:640px;margin:0 auto;padding:16px;-webkit-font-smoothing:antialiased}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.header h1{font-size:26px;font-weight:700}
+.back-btn{background:none;border:none;font-size:15px;color:#111;cursor:pointer;padding:8px 0}
+.back-btn:hover{opacity:.6}
+.category-card{display:flex;justify-content:space-between;align-items:center;background:#f7f7f7;border-radius:14px;padding:18px 20px;margin-bottom:12px;cursor:pointer;border:none;width:100%;text-align:left;font-size:15px;font-weight:600;color:#111}
+.category-card:hover{opacity:.7}
+.chevron{color:#6b6b6b;font-size:18px}
+.material-item{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #e5e5e5;cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;width:100%;text-align:left;font-size:15px;color:#111}
+.material-item:hover{opacity:.6}
+.badge{font-size:13px;color:#6b6b6b}
+.btn-fab{position:fixed;bottom:24px;right:24px;background:#111;color:#fff;border:none;border-radius:50px;padding:14px 22px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.btn-fab:hover{opacity:.8}
+.btn-primary{background:#111;color:#fff;border:none;border-radius:12px;padding:14px 22px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:20px}
+.btn-primary:hover{opacity:.8}
+.btn-learned{border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:20px}
+.btn-learned.off{background:#f7f7f7;color:#111}
+.btn-learned.on{background:#111;color:#fff}
+.english-text{font-size:19px;line-height:1.8;margin-bottom:20px}
+.japanese-text{font-size:15px;line-height:1.8;color:#6b6b6b;margin-bottom:24px}
+.category-tag{display:inline-block;background:#f7f7f7;border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600;margin-bottom:16px}
+.audio-box{background:#f7f7f7;border-radius:12px;padding:20px;margin-top:24px}
+.play-btn{background:#111;color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
+.play-btn:hover{opacity:.8}
+.speed-row{display:flex;justify-content:center;gap:8px;margin-top:16px}
+.speed-chip{padding:8px 14px;border-radius:20px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#111}
+.speed-chip.active{background:#111;color:#fff}
+.speed-chip:hover{opacity:.7}
+.no-audio{text-align:center;color:#6b6b6b;font-size:15px}
+.form-label{font-size:15px;font-weight:600;margin-top:16px;margin-bottom:8px}
+.form-input{width:100%;background:#f7f7f7;border:none;border-radius:12px;padding:12px 14px;font-size:15px;color:#111;resize:vertical}
+.form-input::placeholder{color:#6b6b6b}
+textarea.form-input{min-height:100px;font-family:inherit;line-height:1.6}
+.empty{color:#6b6b6b;font-size:15px;margin-top:20px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="page-home"><div class="header"><h1>ライブラリ</h1></div><div id="category-list"></div></div>
+<div id="page-list" class="hidden"><div class="header"><button class="back-btn" onclick="showHome()">&#8592; 戻る</button><h1 id="list-title"></h1></div><div id="material-list"></div><button class="btn-fab" onclick="showAdd()">＋ 追加</button></div>
+<div id="page-detail" class="hidden"><div class="header"><button class="back-btn" onclick="showList(currentCategory)">&#8592; 戻る</button><h1 id="detail-title"></h1></div><div id="detail-content"></div></div>
+<div id="page-add" class="hidden"><div class="header"><button class="back-btn" onclick="showList(currentCategory)">&#8592; 戻る</button><h1>教材を追加</h1></div><div class="form-label">タイトル</div><input class="form-input" id="add-title" placeholder="例: 013"><div class="form-label">英文</div><textarea class="form-input" id="add-english" placeholder="英文を入力"></textarea><div class="form-label">日本語訳</div><textarea class="form-input" id="add-japanese" placeholder="日本語訳を入力"></textarea><div class="form-label">音声ファイル名</div><input class="form-input" id="add-audio" placeholder="例: 013.wav（audioフォルダ内のファイル名）"><button class="btn-primary" onclick="saveMaterial()">保存</button></div>
+<audio id="audio-player" preload="auto"></audio>
+<script>
+var STORAGE_KEY='eng_library_data';
+var CATEGORIES=[{id:'toushizu',label:'英文解釈の透視図'},{id:'ted',label:'TED'},{id:'polepole',label:'ポレポレ英文読解プロセス50'}];
+var INITIAL_DATA=[
+{id:'t001',categoryId:'toushizu',title:'001',englishText:'In his search for more comfortable living, modern man sometimes makes for his fellow men and even for himself an environment which turns out to be potentially harmful to health.',japaneseText:'より快適な生活を求める中で、現代人は、同時代の人に対してもまた自分たち自身に対しても、健康を害する可能性のある環境を時として作り出すことがある。',audioFile:'001.wav',isLearned:false},
+{id:'t002',categoryId:'toushizu',title:'002',englishText:'Many people seem to have built their lives around the notion that they are in some way indispensable to children, and to question this is to attack the very center of their being.',japaneseText:'多くの人たちは、自分が何らかの点で、子供にとってはなくてはならないものだという考え方を中心に自分の人生を築きあげてきたように思われる。したがって、この考えに異議を唱えることは、彼らの存在のまさに核心を攻撃することなのである。',audioFile:'002.wav',isLearned:false},
+{id:'t003',categoryId:'toushizu',title:'003',englishText:'I heartily wish that in my youth I had had someone of good sense to direct my reading. I sigh when I reflect on the amount of time I had wasted on books that were of no great profit to me. What little guidance I had I owe to a young man who came to live with my family in Heidelberg.',japaneseText:'若いころ、私の指導をしてくれる、誰か良識のある人がいてくれたなら、と心から思う。自分にとって、あまり役に立たなかった本に費やしてきた時間のことを考えると、ため息が出る。私が受けたささやかな読書指導はみな、ハイデルベルグで私の家族と住むようになった青年によるものである。',audioFile:'003.wav',isLearned:false},
+{id:'t004',categoryId:'toushizu',title:'004',englishText:'Change in the whole social system is inevitable not merely because conditions change but because people themselves change. We change as the years go on. New feelings arise in us, old values depreciate, new values arise. Things we thought we wanted most intensely we realize we don\'t care about. The things we built our lives on crumble and disappear, and the process is painful.',japaneseText:'社会制度全体における変化が避けがたいのは、単に状況が変化するためだけではなく、人間自身が変化するためでもある。年月が経つにつれ、私たちは変化するのである。私たちの中に新しい感情が生じ、古い価値観は下落し、新しい価値観が生じる。自分がいちばん強く望んでいると思ったものを、今は何とも思っていないことを私たちは知る。自分の生活を築いてきた土台は崩壊し、姿を消してゆくのであり、その過程は痛ましいものである。',audioFile:'004.wav',isLearned:false},
+{id:'t005',categoryId:'toushizu',title:'005',englishText:'Science is based on careful observation and experiment by which scientists can construct theories that connect different experiences. They seek regularities in the workings of nature which hopefully reveal the fundamental laws that govern the behavior of matter and forces. Central to this approach is the willingness of the scientist to abandon a theory if evidence is produced against it.',japaneseText:'科学は、注意深い観察と実験に基づいており、そのような観察と実験によって、科学者は様々な経験を結びつける理論を構築できる。彼らは自然の働きの中に規則的なものを求め、その規則的なものが物質ともろもろの力の作用を支配する基本的な法則を明らかにすることが望まれている。こういった研究方法の中心をなすのは、ある理論に反する証拠がもたらされると科学者はその理論をためらいもなく捨てるという姿勢なのである。',audioFile:'005.wav',isLearned:false},
+{id:'t006',categoryId:'toushizu',title:'006',englishText:'Strange to say, technology, although of course the product of man, tends to develop by its own laws and principles, and these are very different from those of all natural things. Nature always, so to speak, knows where and when to stop. Greater than the mystery of natural growth is the mystery of the natural stopping of growth.',japaneseText:'奇妙な話だが、科学技術は言うまでもなく人間が作り出したものでありながら、独自の法則と原理にしたがって発達する傾向があり、この法則と原理は自然界のすべての事物が持っている法則と原理とは著しく異なっている。自然はいわば、いつどこで止まればよいのかがつねにわかっているのだ。自然に成長することよりもはるかに不可解なのは、成長が自然に停止することなのである。',audioFile:'006.wav',isLearned:false},
+{id:'t007',categoryId:'toushizu',title:'007',englishText:'Agriculture was a step in human progress to which subsequently there was nothing comparable until our own machine age. Agriculture made possible an immense increase in the number of the human species in the regions where it could be successfully practiced.',japaneseText:'農業は、人間の進歩の中で、それ以降現代の機械時代に至るまで、それに匹敵するものがないような前進であった。農業は、それがうまく実践できる地域の人口の著しい増加を可能にしたのである。',audioFile:'007.wav',isLearned:false},
+{id:'t008',categoryId:'toushizu',title:'008',englishText:'I think it extremely dangerous, so far as Western civilized communities are concerned, to imagine that there are better systems than democracy. It is not so much that democracy is positively good as that it makes impossible certain great evils which are apt to exist under other systems.',japaneseText:'私は、西洋文明社会に関する限り、民主主義よりも優れた制度があると考えるのはきわめて危険だと思う。民主主義が明らかに優れているからというより、むしろ民主主義以外の制度のもとでありがちなある種の害悪が、民主主義のもとではありえないものとなるからだ。',audioFile:'008.wav',isLearned:false},
+{id:'t009',categoryId:'toushizu',title:'009',englishText:'A general disarmament scheme, to be successful, must deprive each nation of the ability to inflict a catastrophic blow on the other; at the least, it must not given an advantage to either side.',japaneseText:'全般的な軍縮計画が、うまく行くためには、いずれの国からも、相手国に対して破滅をもたらすほどの打撃を与える能力を奪う必要がある。少なくとも、どちらの側も有利になってはいけない。',audioFile:'009.wav',isLearned:false},
+{id:'t010',categoryId:'toushizu',title:'010',englishText:'The actions of men were said to be governed by the faculty of reason, those of animals by the faculty of instinct, and this attribution of the action of animals to instinct seems to have disguised from most of those who used the word the need for further study or explanation of them.',japaneseText:'人間の行動は、理性の働きによって支配され、動物の行動は本能の働きによって支配されていると言われてきた。そして動物の行動をこのように本能のせいにしたことが、本能というその言葉を用いた人々のほとんどから、動物の行動についてのさらなる研究や説明の必要性を隠してきたように思われる。',audioFile:'010.wav',isLearned:false},
+{id:'t011',categoryId:'toushizu',title:'011',englishText:'The great development of electrical signaling devices and the vast improvements which have taken place during the past century in the means of transportation have reduced to comparative insignificance the time element in communication.',japaneseText:'電信装置の大きな発展と、過去1世紀の輸送手段のたいへんな進歩が、コミュニケーションにおける時間という要素を比較的重要でないものにした。',audioFile:'011.wav',isLearned:false},
+{id:'t012',categoryId:'toushizu',title:'012',englishText:'The revivals of memory are rarely literal. We naturally remember what interests us. The past is recalled not because of itself but because of what it adds to the present.',japaneseText:'記憶の再生が、正確に行なわれることはめったにない。われわれは当然われわれの関心を引くものを思い出す。過去は、それ自体のために思い出されるのではなくて、過去から現在に付与されるものがあるから思い出されるのである。',audioFile:'012.wav',isLearned:false}
+];
+var currentCategory='';var currentSpeed=1.0;
+function loadData(){var s=localStorage.getItem(STORAGE_KEY);if(!s){localStorage.setItem(STORAGE_KEY,JSON.stringify(INITIAL_DATA));return INITIAL_DATA}return JSON.parse(s)}
+function saveData(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
+function getByCategory(c){return loadData().filter(function(m){return m.categoryId===c})}
+function getById(id){return loadData().find(function(m){return m.id===id})}
+function hideAll(){document.getElementById('page-home').classList.add('hidden');document.getElementById('page-list').classList.add('hidden');document.getElementById('page-detail').classList.add('hidden');document.getElementById('page-add').classList.add('hidden');stopAudio()}
+function showHome(){hideAll();document.getElementById('page-home').classList.remove('hidden');renderCategories()}
+function showList(c){hideAll();currentCategory=c;var cat=CATEGORIES.find(function(x){return x.id===c});document.getElementById('list-title').textContent=cat?cat.label:'';document.getElementById('page-list').classList.remove('hidden');renderMaterialList(c)}
+function showDetail(id){hideAll();document.getElementById('page-detail').classList.remove('hidden');renderDetail(id)}
+function showAdd(){hideAll();document.getElementById('page-add').classList.remove('hidden');document.getElementById('add-title').value='';document.getElementById('add-english').value='';document.getElementById('add-japanese').value='';document.getElementById('add-audio').value=''}
+function renderCategories(){var c=document.getElementById('category-list');c.innerHTML=CATEGORIES.map(function(cat){var n=getByCategory(cat.id).length;return '<button class="category-card" onclick="showList(\''+cat.id+'\')"><span>'+cat.label+'</span><span class="chevron">'+(n>0?n+' ›':'›')+'</span></button>'}).join('')}
+function renderMaterialList(c){var items=getByCategory(c);var el=document.getElementById('material-list');if(items.length===0){el.innerHTML='<p class="empty">教材がまだありません</p>';return}el.innerHTML=items.map(function(m){return '<button class="material-item" onclick="showDetail(\''+m.id+'\')"><span>'+m.title+'</span><span class="badge">'+(m.isLearned?'学習済み':'')+'</span></button>'}).join('')}
+function renderDetail(id){var m=getById(id);if(!m){showHome();return}document.getElementById('detail-title').textContent=m.title;var cat=CATEGORIES.find(function(x){return x.id===m.categoryId});var audioHTML;if(m.audioFile){audioHTML='<div class="audio-box"><button class="play-btn" id="play-btn" onclick="togglePlay(\''+m.audioFile+'\')">&#9654; 再生</button><div class="speed-row">';[0.8,1.0,1.2,1.5,2.0].forEach(function(s){audioHTML+='<button class="speed-chip'+(currentSpeed===s?' active':'')+'" onclick="setSpeed('+s+')">'+s.toFixed(1)+'</button>'});audioHTML+='</div></div>'}else{audioHTML='<div class="audio-box"><p class="no-audio">音声が未設定です</p></div>'}document.getElementById('detail-content').innerHTML='<div class="category-tag">'+(cat?cat.label:'')+'</div><p class="english-text">'+m.englishText+'</p><p class="japanese-text">'+m.japaneseText+'</p>'+audioHTML+'<button class="btn-learned '+(m.isLearned?'on':'off')+'" onclick="toggleLearned(\''+m.id+'\')">'+( m.isLearned?'学習済み ✓':'学習済みにする')+'</button>'}
+var audioEl=document.getElementById('audio-player');var currentAudioFile='';
+function togglePlay(file){if(currentAudioFile!==file){audioEl.src='audio/'+file;audioEl.playbackRate=currentSpeed;currentAudioFile=file}if(audioEl.paused){audioEl.play();document.getElementById('play-btn').textContent='⏸ 一時停止'}else{audioEl.pause();document.getElementById('play-btn').textContent='▶ 再生'}}
+function setSpeed(rate){currentSpeed=rate;audioEl.playbackRate=rate;document.querySelectorAll('.speed-chip').forEach(function(c){c.classList.toggle('active',parseFloat(c.textContent)===rate)})}
+function stopAudio(){audioEl.pause();audioEl.currentTime=0;currentAudioFile=''}
+audioEl.addEventListener('ended',function(){var b=document.getElementById('play-btn');if(b)b.textContent='▶ 再生'});
+function toggleLearned(id){var data=loadData();var item=data.find(function(m){return m.id===id});if(item){item.isLearned=!item.isLearned;saveData(data);renderDetail(id)}}
+function saveMaterial(){var title=document.getElementById('add-title').value.trim();var english=document.getElementById('add-english').value.trim();var japanese=document.getElementById('add-japanese').value.trim();var audioFile=document.getElementById('add-audio').value.trim();if(!title||!english||!japanese){alert('タイトル・英文・日本語訳をすべて入力してください。');return}var data=loadData();data.push({id:currentCategory+'_'+Date.now(),categoryId:currentCategory,title:title,englishText:english,japaneseText:japanese,audioFile:audioFile||null,isLearned:false});saveData(data);showList(currentCategory)}
+showHome();
+</script>
+</body>
+</html>
